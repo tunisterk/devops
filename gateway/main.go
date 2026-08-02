@@ -1,41 +1,52 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
 )
 
+type Employee struct {
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	Department string `json:"department"`
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := http.Get("http://localhost:8081/employees")
-
 	if err != nil {
 		http.Error(w, "Employee Service Unavailable", http.StatusServiceUnavailable)
 		return
 	}
-
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, "Unable to read response", http.StatusInternalServerError)
+		return
+	}
 
-	fmt.Fprintf(w, `
-<html>
-<head>
-<title>Employee Directory</title>
-</head>
+	var employees []Employee
 
-<body>
+	err = json.Unmarshal(body, &employees)
+	if err != nil {
+		http.Error(w, "Invalid JSON", http.StatusInternalServerError)
+		return
+	}
 
-<h1>Employee Directory</h1>
+	tmpl, err := template.ParseFiles("templates/index.html")
+	if err != nil {
+		http.Error(w, "Template Error", http.StatusInternalServerError)
+		return
+	}
 
-<pre>%s</pre>
-
-</body>
-</html>
-`, string(body))
-
+	err = tmpl.Execute(w, employees)
+	if err != nil {
+		http.Error(w, "Template Execute Error", http.StatusInternalServerError)
+	}
 }
 
 func health(w http.ResponseWriter, r *http.Request) {
