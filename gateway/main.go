@@ -16,8 +16,8 @@ type Employee struct {
 
 func home(w http.ResponseWriter, r *http.Request) {
 
-	resp, err := http.Get("http://localhost:8081/employees")
-	if err != nil {
+		resp, err := http.Get("http://employee-service:80/employees")
+		if err != nil {
 		http.Error(w, "Employee Service Unavailable", http.StatusServiceUnavailable)
 		return
 	}
