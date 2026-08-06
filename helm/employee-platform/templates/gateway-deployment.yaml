@@ -2,10 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: go-web-app
+  namespace: {{ .Values.namespace }} 
   labels:
     app: go-web-app
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount}}
   selector:
     matchLabels:
       app: go-web-app
@@ -16,6 +17,7 @@ spec:
     spec:
       containers:
       - name: go-web-app
-        image: tunisterk/go-app:{{ .Values.image.tag }}
+        image: {{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}
+        imagePullPolicy: {{ .Values.gateway.image.pullPolicy }}
         ports:
-        - containerPort: 8080
+        - containerPort: {{ .Values.gateway.port }}

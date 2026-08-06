@@ -2,10 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: employee-service
+  namespace: {{ .Values.namespace }}
+
   labels:
     app: employee-service
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: employee-service
@@ -16,7 +18,8 @@ spec:
     spec:
       containers:
       - name: employee-service
-        image: tunisterk/go-services:v1
-        imagePullPolicy: IfNotPresent
+        image: {{ .Values.employeeService.image.repository }}:{{ .Values.employeeService.image.tag}}
+        imagePullPolicy:  {{ .Values.employeeService.image.pullPolicy }}
+
         ports:
-        - containerPort: 8081
+        - containerPort: {{ .Values.employeeService.port }}
